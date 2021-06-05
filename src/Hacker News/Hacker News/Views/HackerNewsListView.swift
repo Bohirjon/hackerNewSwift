@@ -8,9 +8,13 @@
 import SwiftUI
 
 struct ContentView: View {
+    @State private var isShown = true
     var body: some View {
-        Text("Hello, world!")
+        Text(isShown ? "Shown" : "hidden")
             .padding()
+            .onTapGesture {
+                isShown.toggle()
+            }
     }
 }
 
