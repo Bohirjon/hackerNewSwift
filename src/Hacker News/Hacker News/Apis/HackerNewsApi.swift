@@ -19,10 +19,12 @@ protocol HackerNewsProtocol {
     var hackerNewsDelegate: HackerNewsApiDelegate? {get set}
     func fetchIds()
     func fetchArticle(id: Int)
+    func fetchArticle(id: Int, onFetched: @escaping (Story?, Error?)->Void)
 }
 
 
 class HackerNewsApi: HackerNewsProtocol {
+    
     var hackerNewsDelegate: HackerNewsApiDelegate?
     
     func fetchIds() {
@@ -76,6 +78,26 @@ class HackerNewsApi: HackerNewsProtocol {
         } else {
             self.hackerNewsDelegate?.onStoryFetchFailed(error: ArgumentError.argumentError("Url was wrong!"))
         }
+    }
+    
+    func fetchArticle(id: Int, onFetched: @escaping (Story?, Error?) -> Void) {
+        let stringUrl = "https://hacker-news.firebaseio.com/v0/item/\(id.description).json?print=pretty"
+        
+        guard let url = URL(string: stringUrl ) else {
+            onFetched(nil, ArgumentError.argumentError("Url was wrong"))
+            return
+        }
+        
+        URLSession.shared.dataTask(with: url) { data, response, error in
+            if let error = error {
+                onFetched(nil, ArgumentError.argumentError("\(error.localizedDescription)"))
+                return
+            }
+            
+            
+            
+        }
+        .resume()
     }
 }
 

@@ -8,14 +8,43 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var isShown = true
+    @ObservedObject private var viewModel = MainViewModel(hackerNewsApi: HackerNewsApi())
     var body: some View {
-        Text(isShown ? "Shown" : "hidden")
-            .padding()
-            .onTapGesture {
-                isShown.toggle()
-            }
+        NavigationView{
+            listView
+                .navigationBarTitle("Top Stories", displayMode: .large)
+                .navigationBarItems(trailing: HStack {
+                    Button(action: {
+                        
+                    }, label: {
+                        Image(systemName: "magnifyingglass")
+                    })
+                    Button(action: {
+                        
+                    }, label: {
+                        Image(systemName: "ellipsis")
+                            .rotationEffect(.degrees(90))
+                    })
+                })
+        }
+        .onAppear(perform: {
+            self.viewModel.fetchIds()
+        })
     }
+    
+    @ViewBuilder
+    var listView: some View {
+        if let safeIds = viewModel.ids {
+            List {
+                ForEach(safeIds, id: \.self) { id in
+                    StoryView(storyId: id)
+                }
+            }
+        } else {
+            ProgressView("loading")
+        }
+    }
+    
 }
 
 struct ContentView_Previews: PreviewProvider {
