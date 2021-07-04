@@ -1,2 +1,4 @@
 # hackerNewSwift
-using hacker news api with swift
+Hacker news 
+
+![Image of Yaktocat](images/screenshot.png)
