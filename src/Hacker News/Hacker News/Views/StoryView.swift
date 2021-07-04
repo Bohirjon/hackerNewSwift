@@ -9,8 +9,7 @@ import SwiftUI
 
 struct StoryView: View {
     @ObservedObject private var viewModel: StoryViewCellViewModel
-    @State private var story : Story? = nil
-    
+
     init(storyId: Int) {
         viewModel = StoryViewCellViewModel(id: storyId, hackerApi: HackerNewsApi())
         viewModel.fetch()
@@ -29,50 +28,66 @@ struct StoryView: View {
     }
     
     var dataView: some View {
-        VStack(spacing: .some(7.0)) {
-            HStack {
-                Text(viewModel.story!.title)
-                    .font(.headline)
-                    .bold()
-                Spacer()
-            }
-            HStack {
-                Text(viewModel.story!.descendants)
-                    .foregroundColor(.gray.opacity(0.8))
-                Spacer()
-                Text("10h - by")
-                Text("\(viewModel.story!.by)")
+        NavigationLink(destination: StoryDetailView(stringUrl: viewModel.story!.url!)) {
+            VStack(spacing: .some(7.0)) {
+                HStack {
+                    Text(viewModel.story!.title)
+                        .foregroundColor(.black)
+                        .font(.headline)
+                        .bold()
+                    Spacer()
+                }
+                HStack {
+                    if let descendants = viewModel.story!.descendants {
+                        Text(descendants.description)
+                            .foregroundColor(.gray.opacity(0.8))
+                    }
+                    
+                    Spacer()
+                    Text("10h - by")
+                        .foregroundColor(.black)
+                    Text("\(viewModel.story!.by)")
+                        .foregroundColor(.blue)
+                }
+                
+                HStack {
+                    Group {
+                        Image(systemName: "hand.thumbsup")
+                        Text(viewModel.story!.score.description)
+                            .padding(.trailing)
+                    }
                     .foregroundColor(.blue)
-            }
-            
-            HStack {
-                Group {
-                    Image(systemName: "hand.thumbsup")
-                    Text(viewModel.story!.score.description)
-                        .padding(.trailing)
+                    
+                    Group {
+                        Image(systemName: "bubble.left")
+                        Text(viewModel.story!.kids != nil ? viewModel.story!.kids!.count.description : "0")
+                    }
+                    .foregroundColor(.orange)
+                    
+                    Spacer()
+                    Image(systemName: "bookmark")
+                        .foregroundColor(.black)
                 }
-                .foregroundColor(.blue)
-                
-                Group {
-                    Image(systemName: "bubble.left")
-                    Text(viewModel.story!.kids.count.description)
-                }
-                .foregroundColor(.orange)
-                
-                Spacer()
-                Image(systemName: "bookmark")
             }
+            .padding()
         }
-        .padding()
     }
     
     var errorView : some View {
-        Text("\(viewModel.error.debugDescription)")
+        print("error occurred \(viewModel.error.debugDescription)")
+        return Text("\(viewModel.error.debugDescription)")
     }
     
     var loadingView: some View {
-        ProgressView()
-            .progressViewStyle(LinearProgressViewStyle())
+        VStack {
+            EmptyView()
+                .background(Color.gray.opacity(0.8))
+                .foregroundColor(.red)
+                .frame(width: 100, height: 20)
+                .font(.headline)
+            ProgressView()
+                .progressViewStyle(LinearProgressViewStyle())
+        }
     }
     
 }
@@ -90,13 +105,16 @@ class StoryViewCellViewModel: ObservableObject {
         self.hackerApi = hackerApi
     }
     func fetch() {
+        loading = true
         hackerApi.fetchArticle(id: id) { story, error in
-            if let safeError = error {
-                self.error = safeError
-            }
-            
-            if let safeStory = story {
-                self.story = safeStory
+            DispatchQueue.main.async {
+                if let safeError = error {
+                    self.error = safeError
+                }
+                if let safeStory = story {
+                    self.story = safeStory
+                }
+                self.loading = false
             }
         }
     }

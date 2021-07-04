@@ -94,7 +94,19 @@ class HackerNewsApi: HackerNewsProtocol {
                 return
             }
             
-            
+            if let safeData = data {
+                let jsonDecoder = JSONDecoder()
+                do {
+                    let story = try jsonDecoder.decode(Story.self, from: safeData)
+                    onFetched(story, nil)
+                } catch let parseError {
+                    print(parseError)
+                    onFetched(nil, parseError)
+                }
+                
+            } else {
+                onFetched(nil, ArgumentError.argumentError("Could not fetch the data"))
+            }
             
         }
         .resume()

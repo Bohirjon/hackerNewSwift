@@ -7,14 +7,13 @@
 
 import Foundation
 
-struct Story : Codable {
+class Story : Codable {
     var id: Int
     var by: String
-    var descendants: String
+    var descendants: Int?
     var score: Int
     var time: Int
     var title: String
-    var url: String
-    var kids: [Int]
-    
+    var url: String?
+    var kids: [Int]?
 }

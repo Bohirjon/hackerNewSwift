@@ -35,9 +35,11 @@ struct ContentView: View {
     @ViewBuilder
     var listView: some View {
         if let safeIds = viewModel.ids {
-            List {
-                ForEach(safeIds, id: \.self) { id in
-                    StoryView(storyId: id)
+            ScrollView {
+                LazyVStack {
+                    ForEach(safeIds, id: \.self) { id in
+                        StoryView(storyId: id)
+                    }
                 }
             }
         } else {
